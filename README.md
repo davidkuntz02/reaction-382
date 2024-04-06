@@ -5,3 +5,5 @@ NMSU CS-382 Spring 2024 Team Reaction Final Project Repository
 - davidkuntz02
 - irvinggv
 - laztiqui
+- BRDY-SCAG
+
