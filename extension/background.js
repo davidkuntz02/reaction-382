@@ -1,1 +1,3 @@
-console.log("hello");
+//runs in the background
+
+console.log("background");
