@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Uploading</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <h1>Upload Image</h1>
+    <hr />
+    <div>
+        <form action="/" method="POST" enctype="multipart/form-data">
+            <div>
+                <label for="name">Image Title</label>
+                <input
+                    type="text"
+                    id="name"
+                    placeholder="Name"
+                    value=""
+                    name="name"
+                    required
+                />
+            </div>
+            <div>
+                <label for="desc">Image Description</label>
+                <textarea
+                    id="desc"
+                    name="desc"
+                    value=""
+                    rows="2"
+                    placeholder="Description"
+                    required
+                >
+                </textarea>
+            </div>
+            <div>
+                <label for="image">Upload Image</label>
+                <input type="file" id="image" name="image" value="" required />
+            </div>
+            <div>
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+
+    <hr />
+
+    <!-- Search bar -->
+    <div>
+        <input type="text" id="searchInput" placeholder="Search by name..." />
+        <button onclick="searchImages()">Search</button>
+    </div>
+
+    <h1>Uploaded Images</h1>
+    <div id="imageContainer">
+        <% items.forEach(function(image) { %>
+            <div class="imageItem">
+                <% if(image.img && image.img.data && image.img.contentType) { %>
+                    <img src="data:image/<%= image.img.contentType %>;base64,<%= image.img.data.toString('base64') %>" />
+                    <div class="imageName" style="display: none;"><%= image.name %></div>
+                <% } %>
+                <div>
+                    <h5><%= image.name %></h5>
+                    <p><%= image.desc %></p>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+
+    <script>
+        function searchImages() {
+            var searchText = $('#searchInput').val().toLowerCase();
+            var imageItems = $('.imageItem');
+
+            // Hide all images
+            imageItems.hide();
+
+            // Check each image item
+            imageItems.each(function() {
+                var imageName = $(this).find('.imageName').text().toLowerCase();
+                if (imageName.includes(searchText)) {
+                    // Show the matching image item
+                    $(this).show();
+                    // Once found, stop the loop
+                    return false;
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

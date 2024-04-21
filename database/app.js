@@ -1,80 +1,68 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const multer = require('multer');
-const path = require('path');
+var express = require('express')
+var app = express();
+var bodyParser = require('body-parser');
+var mongoose = require('mongoose')
+var imgSchema = require('./model.js');
+var fs = require('fs');
+var path = require('path');
+app.set("view engine", "ejs");
+require('dotenv').config();
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+mongoose.connect(process.env.MONGO_URL)
+.then(console.log("DB Connected"))
 
-// Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/imageUploader', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('Failed to connect to MongoDB:', err));
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 
-// Define image schema
-const ImageSchema = new mongoose.Schema({
-    name: String,
-    data: Buffer,
-    contentType: String
+var multer = require('multer');
+
+var storage = multer.diskStorage({
+	destination: (req, file, cb) => {
+		cb(null, 'uploads')
+	},
+	filename: (req, file, cb) => {
+		cb(null, file.fieldname + '-' + Date.now())
+	}
 });
 
-const Image = mongoose.model('Image', ImageSchema);
+var upload = multer({ storage: storage });
 
-// Set up multer for handling file uploads
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
-
-// Serve HTML file for image upload
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+	imgSchema.find({})
+	.then((data, err)=>{
+		if(err){
+			console.log(err);
+		}
+		res.render('imagepage',{items: data})
+	})
 });
 
-// Handle image upload
-app.post('/upload', upload.single('image'), async (req, res) => {
-    const { name } = req.body; // Retrieve name from request body
-    const { originalname, buffer, mimetype } = req.file;
-    try {
-        const newImage = new Image({
-            name: name || originalname, // Use specified name or original filename
-            data: buffer,
-            contentType: mimetype
-        });
-        await newImage.save();
-        res.send('Image uploaded successfully');
-        console.log('Image uploaded successfully');
-    } catch (err) {
-        console.error('Error uploading image:', err);
-        res.status(500).send('Error uploading image');
-    }
+
+app.post('/', upload.single('image'), (req, res, next) => {
+
+	var obj = {
+		name: req.body.name,
+		desc: req.body.desc,
+		img: {
+			data: fs.readFileSync(path.join(__dirname + '/uploads/' + req.file.filename)),
+			contentType: 'image/png'
+		}
+	}
+	imgSchema.create(obj)
+	.then ((err, item) => {
+		if (err) {
+			console.log(err);
+		}
+		else {
+			// item.save();
+			res.redirect('/');
+		}
+	});
 });
 
-// Serve HTML file for image lookup
-app.get('/lookup', (req, res) => {
-    res.sendFile(path.join(__dirname, 'lookup.html'));
-});
-
-// Handle image lookup
-app.get('/image/:name', async (req, res) => {
-    const { name } = req.params;
-    try {
-        const image = await Image.findOne({ name });
-        if (!image) {
-            console.log('Image not found');
-            return res.status(404).send('Image not found');
-            
-        }
-        res.contentType(image.contentType);
-        res.send(image.data);
-    } catch (err) {
-        console.error('Error retrieving image:', err);
-        res.status(500).send('Error retrieving image');
-    }
-});
-
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+var port = process.env.PORT || '3000'
+app.listen(port, err => {
+	if (err)
+		throw err
+	console.log('Server listening on port', port)
+})
