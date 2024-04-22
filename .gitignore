@@ -72,8 +72,8 @@ web_modules/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variable files (maybe don't put these in the gitignore?)
-.env
+# dotenv environment variable files
+#.env #we need this one
 .env.development.local
 .env.test.local
 .env.production.local
