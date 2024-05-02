@@ -1,68 +1,69 @@
-var express = require('express')
-var app = express();
-var bodyParser = require('body-parser');
-var mongoose = require('mongoose')
-var imgSchema = require('./model.js');
-var fs = require('fs');
-var path = require('path');
-app.set("view engine", "ejs");
-require('dotenv').config();
+const express = require('express');
+const bodyParser = require('body-parser');
+const multer = require('multer');
+const mongoose = require('mongoose');
 
-mongoose.connect(process.env.MONGO_URL)
-.then(console.log("DB Connected"))
+const app = express();
+const upload = multer();
 
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/mydatabase', { useNewUrlParser: true, useUnifiedTopology: true });
+const db = mongoose.connection;
 
-var multer = require('multer');
+// Image schema
+const imageSchema = new mongoose.Schema({
+    name: String,
+    data: Buffer,
+    contentType: String
+});
+const Image = mongoose.model('Image', imageSchema);
 
-var storage = multer.diskStorage({
-	destination: (req, file, cb) => {
-		cb(null, 'uploads')
-	},
-	filename: (req, file, cb) => {
-		cb(null, file.fieldname + '-' + Date.now())
-	}
+// Middleware
+app.use(bodyParser.json());
+
+// Route to handle image upload
+app.post('/upload', upload.single('image'), (req, res) => {
+    const newImage = new Image({
+        name: req.body.imageName, // Use the provided name
+        data: req.file.buffer,
+        contentType: req.file.mimetype
+    });
+
+    newImage.save()
+        .then(image => {
+            res.status(200).send('Image uploaded successfully');
+        })
+        .catch(err => {
+            res.status(500).send(err);
+        });
 });
 
-var upload = multer({ storage: storage });
 
-app.get('/', (req, res) => {
-	imgSchema.find({})
-	.then((data, err)=>{
-		if(err){
-			console.log(err);
-		}
-		res.render('imagepage',{items: data})
-	})
+
+// Route to handle image search
+app.get('/search', (req, res) => {
+    const searchQuery = req.query.query;
+
+    Image.findOne({ name: searchQuery })
+        .then(image => {
+            if (!image) {
+                console.error('Image not found');
+                return res.status(404).send('Image not found');
+            }
+            res.contentType(image.contentType);
+            res.send(image.data);
+        })
+        .catch(err => {
+            console.error('Error finding image:', err);
+            res.status(500).send('Error finding image');
+        });
 });
 
 
-app.post('/', upload.single('image'), (req, res, next) => {
 
-	var obj = {
-		name: req.body.name,
-		desc: req.body.desc,
-		img: {
-			data: fs.readFileSync(path.join(__dirname + '/uploads/' + req.file.filename)),
-			contentType: 'image/png'
-		}
-	}
-	imgSchema.create(obj)
-	.then ((err, item) => {
-		if (err) {
-			console.log(err);
-		}
-		else {
-			// item.save();
-			res.redirect('/');
-		}
-	});
+
+// Start the server
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
 });
-
-var port = process.env.PORT || '3000'
-app.listen(port, err => {
-	if (err)
-		throw err
-	console.log('Server listening on port', port)
-})

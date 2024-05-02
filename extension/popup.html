@@ -1,12 +1,18 @@
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-    <title>Document</title>
+  <title>Image Uploader</title>
+  <script src="popup.js"></script>
 </head>
 <body>
-    <!-- popup menu for uploading images -->
-    <h1>Upload an image</h1>
-    <button>[here]</button>
-    <h1>View the images you uploaded</h1>
-    <button>[here]</button>
+  <h1>Upload Image</h1>
+  <input type="file" id="imageInput">
+  <input type="text" id="imageName" placeholder="Enter image name">
+  <button id="uploadButton">Upload</button>
+
+  <h1>Search Image</h1>
+  <input type="text" id="searchQuery" placeholder="Enter search query">
+  <button id="searchButton">Search</button>
+  <div id="imageContainer"></div>
 </body>
 </html>

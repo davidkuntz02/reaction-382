@@ -8,11 +8,7 @@
     },
     "host_permissions": [],
     "permissions": [
-      "activeTab",
-      "scripting",
-      "contextMenus",
-      "storage",
-      "tabs"
+      "activeTab","scripting","contextMenus","storage","tabs"
     ],
     "background": {
       "service_worker": "background.js"
