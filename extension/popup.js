@@ -56,3 +56,7 @@ function searchImage() {
         console.error('Error:', error);
     });
 }
+
+document.getElementById('toggleMode').addEventListener('click', function() {
+    document.body.classList.toggle('dark-mode');
+});

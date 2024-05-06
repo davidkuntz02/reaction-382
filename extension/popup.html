@@ -1,18 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Image Uploader</title>
-  <script src="popup.js"></script>
+    <title>Image Uploader</title>
+    <link rel="stylesheet" href = "style.css">
 </head>
 <body>
-  <h1>Upload Image</h1>
-  <input type="file" id="imageInput">
-  <input type="text" id="imageName" placeholder="Enter image name">
-  <button id="uploadButton">Upload</button>
+    <div class="top-right">
+        <span class="dark-text">Dark Mode</span>
+        <label class="switch">
+            <input type="checkbox">
+            <span id="toggleMode" class="slider round"></span>
+        </label>
+    </div>
+    
 
-  <h1>Search Image</h1>
-  <input type="text" id="searchQuery" placeholder="Enter search query">
-  <button id="searchButton">Search</button>
-  <div id="imageContainer"></div>
+    <h1>Upload Image</h1>
+
+    <input type="file" id="imageInput">
+    <input type="text" id="imageName" placeholder="Enter image name">
+    <button id="uploadButton">Upload</button>
+
+    <h1>Search Image</h1>
+    <input type="text" id="searchQuery" placeholder="Enter search query">
+    <button id="searchButton">Search</button>
+    <div id="imageContainer"></div>
+    
+
 </body>
+<script src="popup.js"></script>
 </html>
